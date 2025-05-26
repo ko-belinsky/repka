@@ -13,6 +13,36 @@ TARGET_NAME=$(basename "$1")
 [ -d "$HOME/Рабочий стол" ] && DESKTOP_PATH="$HOME/Рабочий стол" || DESKTOP_PATH="$HOME/Desktop"
 AUTOSTART_DIR="$HOME/.config/autostart"
 
+# Функция для проверки PortProton
+check_portproton() {
+    # Проверяем, установлен ли PortProton через flatpak (правильное имя приложения)
+    if flatpak list | grep -q ru.linux_gaming.PortProton; then
+        echo "flatpak run ru.linux_gaming.PortProton run '$TARGET_FILE'"
+        return 0
+    fi
+
+    # Проверяем, установлен ли PortProton через репозитории
+    if which portproton &>/dev/null; then
+        echo "portproton '$TARGET_FILE'"
+        return 0
+    fi
+
+    return 1
+}
+
+# Проверяем, является ли файл .exe и есть ли PortProton
+if [[ "$TARGET_FILE" == *.exe ]]; then
+    PORT_PROTON_CMD=$(check_portproton)
+    if [ $? -eq 0 ]; then
+        EXEC_COMMAND="$PORT_PROTON_CMD"
+    else
+        yad --info --text="PortProton не найден в системе" --width=350
+        EXEC_COMMAND="\"$TARGET_FILE\""
+    fi
+else
+    EXEC_COMMAND="\"$TARGET_FILE\""
+fi
+
 # Форма с нормальными подписями кнопок
 FORM_DATA=$(yad --form \
     --title="Создать ярлык для $TARGET_NAME" \
@@ -42,7 +72,7 @@ Version=1.0
 Type=Application
 Name=$NAME
 Comment=$COMMENT
-Exec=\"$TARGET_FILE\"  # Теперь используется полный путь
+Exec=$EXEC_COMMAND
 Icon=$ICON
 Terminal=false
 "
