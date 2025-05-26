@@ -14,7 +14,7 @@ detect_de:
 
 install: detect_de
 	mkdir -p $(BIN_DIR)
-	install -m 755 src/create-shortcut.sh $(BIN_DIR)/create-shortcut.sh
+	install -m 755 create-shortcut.sh $(BIN_DIR)/create-shortcut.sh
 	
 	@if [ -n "$$(pgrep -x gnome-shell)" ]; then \
 		mkdir -p $(NAUTILUS_SCRIPTS_DIR); \
@@ -23,7 +23,7 @@ install: detect_de
 		pkill -x nautilus || true; \
 	elif [ -n "$$(pgrep -x plasmashell)" ]; then \
 		mkdir -p $(KDE_SERVICES_DIR); \
-		cp src/kde/create-shortcut.desktop $(KDE_SERVICES_DIR); \
+		cp create-shortcut.desktop $(KDE_SERVICES_DIR); \
 		echo "Installed for KDE"; \
 		kbuildsycoca6 || true; \
 	else \
