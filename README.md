@@ -1,3 +1,6 @@
+![Alt text](/preview.png?raw=true)
+
+
 # Desktop Shortcut Creator
 
 ## Installation
