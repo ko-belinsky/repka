@@ -7,6 +7,6 @@ X-KDE-Priority=TopLevel
 Icon=list-add
 
 [Desktop Action createShortcut]
-Name=Create Shortcut
+Name=Создать ярлык
 Icon=list-add
 Exec=$HOME/.local/bin/create-shortcut.sh %f
