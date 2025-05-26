@@ -23,4 +23,7 @@ make install```
 
 Для установки зависимостей в Ubuntu/Debian:
 ```bash
-sudo apt install yad coreutils
+sudo apt install yad coreutils```
+   ALT Linux
+```su -
+   apt-get install yad coreutils```
