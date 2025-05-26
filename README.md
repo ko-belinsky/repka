@@ -4,7 +4,8 @@
 ```bash
 git clone https://github.com/ko-belinsky/shortcut-creator.git
 cd shortcut-creator
-make install```
+make install
+```
 
 1. При запуске `make install`:
    - Определяет DE (GNOME/KDE)
@@ -18,12 +19,15 @@ make install```
    - Обновляет кеш меню
 
 3. Зависимости:
-   - `yad` (должен быть установлен)
-   - `realpath` (из coreutils)
+   - yad
+   - realpath (из coreutils)
 
 Для установки зависимостей в Ubuntu/Debian:
 ```bash
-sudo apt install yad coreutils```
+sudo apt install yad coreutils
+```
    ALT Linux
-```su -
-   apt-get install yad coreutils```
+```bash
+   su -
+   apt-get install yad coreutils
+```
