@@ -13,7 +13,7 @@ detect_de:
 	fi
 
 install: detect_de
-	mkdir -p $(BIN_DIR)
+	-mkdir -p $(BIN_DIR)
 	install -m 755 create-shortcut.sh $(BIN_DIR)/create-shortcut.sh
 	
 	@if [ -n "$$(pgrep -x gnome-shell)" ]; then \
