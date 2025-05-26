@@ -3,6 +3,9 @@ BIN_DIR ?= $(PREFIX)/bin
 NAUTILUS_SCRIPTS_DIR ?= $(PREFIX)/share/nautilus/scripts
 KDE_SERVICES_DIR ?= $(PREFIX)/share/kio/servicemenus
 
+# Проверяем, существует ли файл перед установкой
+CHECK_FILE_EXISTS := $(wildcard create-shortcut.sh)
+
 detect_de:
 	@if [ -n "$$(pgrep -x gnome-shell)" ]; then \
 		echo "GNOME detected"; \
@@ -14,7 +17,13 @@ detect_de:
 
 install: detect_de
 	@mkdir -p $(BIN_DIR) 2>/dev/null || true
-	@install -m 755 create-shortcut.sh $(BIN_DIR)/create-shortcut.sh
+	@if [ -f "create-shortcut.sh" ]; then \
+		install -m 755 create-shortcut.sh $(BIN_DIR)/create-shortcut.sh; \
+		echo "Installed create-shortcut.sh to $(BIN_DIR)"; \
+	else \
+		echo "Error: create-shortcut.sh not found in current directory!"; \
+		exit 1; \
+	fi
 	
 	@if [ -n "$$(pgrep -x gnome-shell)" ]; then \
 		mkdir -p $(NAUTILUS_SCRIPTS_DIR) 2>/dev/null || true; \
