@@ -24,11 +24,12 @@ install: detect_de
 	elif [ -n "$$(pgrep -x plasmashell)" ]; then \
 		mkdir -p $(KDE_SERVICES_DIR) 2>/dev/null || true; \
 		cp -f create-shortcut.desktop $(KDE_SERVICES_DIR)/ 2>/dev/null || true; \
+		chmod +x $(KDE_SERVICES_DIR)/create-shortcut.desktop 2>/dev/null || true; \
 		echo "Добавлено в контекстное меню Dolphin"; \
 		kbuildsycoca6 2>/dev/null || true; \
 	else \
-		echo "Графическое окружение не определено, попробуйте ручную установку в ваш файловый менеджер"; \
-	fi
+	echo "Графическое окружение не определено, попробуйте ручную установку в ваш файловый менеджер"; \
+fi
 
 uninstall:
 	@rm -f $(BIN_DIR)/create-shortcut.sh 2>/dev/null || true
