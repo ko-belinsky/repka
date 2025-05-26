@@ -1,7 +1,7 @@
 PREFIX ?= $(HOME)/.local
 BIN_DIR ?= $(PREFIX)/bin
 NAUTILUS_SCRIPTS_DIR ?= $(PREFIX)/share/nautilus/scripts
-KDE_SERVICES_DIR ?= $(PREFIX)/share/kservices5/ServiceMenus
+KDE_SERVICES_DIR ?= $(PREFIX)/share/kio/servicemenus
 
 detect_de:
 	@if [ -n "$$(pgrep -x gnome-shell)" ]; then \
