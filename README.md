@@ -3,6 +3,10 @@
 
 # Desktop Shortcut Creator
 
+Маленькая программка для создания .desktop ярлыка для выбранного файла, через контекстное меню Nautilus/Dolphin в Альт Линукс.
+Приложения .exe будут запускаться через PortProton, если он установлен.
+Можно создать ярлык в меню приложений, на рабочем столе или добавить в автозагрузку (на выбор)
+
 ## Installation
 ```bash
 git clone https://github.com/ko-belinsky/shortcut-creator.git
@@ -25,10 +29,6 @@ make install
    - yad
    - realpath (из coreutils)
 
-Для установки зависимостей в Ubuntu/Debian:
-```bash
-sudo apt install yad coreutils
-```
    ALT Linux
 ```bash
    su -
