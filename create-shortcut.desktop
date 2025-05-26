@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=application/x-executable;application/x-shellscript;
+Actions=createShortcut;
+X-KDE-Priority=TopLevel
+Icon=list-add
+
+[Desktop Action createShortcut]
+Name=Create Shortcut
+Icon=list-add
+Exec=$HOME/.local/bin/create-shortcut.sh %f
