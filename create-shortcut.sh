@@ -9,6 +9,47 @@ TARGET_FILE="$(realpath "$1")"  # Полный абсолютный путь к 
 DESKTOP_DIR="$HOME/.local/share/applications"
 TARGET_NAME=$(basename "$1")
 
+# Функция для поиска существующих ярлыков
+find_existing_desktop_files() {
+    local exe_name=$(basename "$TARGET_FILE")
+    local found_files=()
+    
+    # Ищем в папке .desktop файлы, где Exec содержит имя нашего файла
+    for desktop_file in "$DESKTOP_DIR"/*.desktop; do
+        [ -f "$desktop_file" ] || continue
+        
+        # Получаем строку Exec из .desktop файла
+        exec_line=$(grep -E "^Exec=" "$desktop_file" | head -1)
+        if [[ "$exec_line" == *"$exe_name"* ]]; then
+            found_files+=("$desktop_file")
+        fi
+    done
+    
+    echo "${found_files[@]}"
+}
+
+# Проверяем существующие ярлыки
+existing_files=$(find_existing_desktop_files)
+if [ -n "$existing_files" ]; then
+    # Формируем список для отображения
+    file_list=$(printf '%s\n' "${existing_files[@]}")
+    
+    # Диалог с предложением удалить
+    yad --question \
+        --title="Обнаружены существующие ярлыки" \
+        --text="Найдены существующие ярлыки для этого исполняемого файла:\n\n$file_list\n\nУдалить их?" \
+        --width=500 \
+        --button="Удалить:0" \
+        --button="Оставить:1"
+    
+    if [ $? -eq 0 ]; then
+        for file in "${existing_files[@]}"; do
+            rm -f "$file"
+        done
+        kbuildsycoca6 --noincremental 2>/dev/null
+    fi
+fi
+
 # Определяем пути
 [ -d "$HOME/Рабочий стол" ] && DESKTOP_PATH="$HOME/Рабочий стол" || DESKTOP_PATH="$HOME/Desktop"
 AUTOSTART_DIR="$HOME/.config/autostart"
