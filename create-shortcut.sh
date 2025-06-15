@@ -1,35 +1,77 @@
 #!/bin/bash
 
+# Кэш для проверки PortProton
+PORT_PROTON_CACHE_FILE="$HOME/.cache/portproton_check"
+PORT_PROTON_CACHE_TIMEOUT=3600 # 1 час
+
+# Функция для проверки кэша PortProton
+check_portproton_cache() {
+    if [ -f "$PORT_PROTON_CACHE_FILE" ]; then
+        local cache_time=$(stat -c %Y "$PORT_PROTON_CACHE_FILE")
+        local current_time=$(date +%s)
+        if (( current_time - cache_time < PORT_PROTON_CACHE_TIMEOUT )); then
+            cat "$PORT_PROTON_CACHE_FILE"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Функция для проверки PortProton с таймаутом
+check_portproton() {
+    # Сначала проверяем кэш
+    local cached_result
+    if cached_result=$(check_portproton_cache); then
+        echo "$cached_result"
+        return 0
+    fi
+
+    # Проверяем flatpak с таймаутом
+    if timeout 2 flatpak list 2>/dev/null | grep -q ru.linux_gaming.PortProton; then
+        echo "flatpak run ru.linux_gaming.PortProton run" > "$PORT_PROTON_CACHE_FILE"
+        echo "flatpak run ru.linux_gaming.PortProton run"
+        return 0
+    fi
+
+    # Проверяем системный portproton с таймаутом
+    if timeout 2 which portproton &>/dev/null; then
+        echo "portproton" > "$PORT_PROTON_CACHE_FILE"
+        echo "portproton"
+        return 0
+    fi
+
+    return 1
+}
+
 [ -z "$1" ] && {
     yad --error --text="Не выбран файл!" --width=250
     exit 1
 }
 
-TARGET_FILE="$(realpath "$1")"  # Полный абсолютный путь к файлу
+TARGET_FILE="$(realpath "$1" 2>/dev/null || echo "$1")"  # Полный абсолютный путь к файлу
 DESKTOP_DIR="$HOME/.local/share/applications"
 TARGET_NAME=$(basename "$1")
 
-# Функция для поиска существующих ярлыков
+# Оптимизированная функция для поиска существующих ярлыков
 find_existing_desktop_files() {
     local exe_name=$(basename "$TARGET_FILE")
     local found_files=()
     
-    # Ищем в папке .desktop файлы, где Exec содержит имя нашего файла
-    for desktop_file in "$DESKTOP_DIR"/*.desktop; do
+    # Используем find с -maxdepth для ограничения глубины поиска
+    while IFS= read -r desktop_file; do
         [ -f "$desktop_file" ] || continue
         
-        # Получаем строку Exec из .desktop файла
-        exec_line=$(grep -E "^Exec=" "$desktop_file" | head -1)
-        if [[ "$exec_line" == *"$exe_name"* ]]; then
+        # Используем grep с -l для быстрого поиска
+        if grep -l "Exec=.*$exe_name" "$desktop_file" &>/dev/null; then
             found_files+=("$desktop_file")
         fi
-    done
+    done < <(find "$DESKTOP_DIR" -maxdepth 1 -name "*.desktop" -type f 2>/dev/null)
     
     echo "${found_files[@]}"
 }
 
-# Проверяем существующие ярлыки
-existing_files=$(find_existing_desktop_files)
+# Проверяем существующие ярлыки с таймаутом
+existing_files=$(timeout 2 find_existing_desktop_files)
 if [ -n "$existing_files" ]; then
     # Формируем список для отображения
     file_list=$(printf '%s\n' "${existing_files[@]}")
@@ -46,7 +88,7 @@ if [ -n "$existing_files" ]; then
         for file in "${existing_files[@]}"; do
             rm -f "$file"
         done
-        kbuildsycoca6 --noincremental 2>/dev/null
+        timeout 2 kbuildsycoca6 --noincremental 2>/dev/null
     fi
 fi
 
@@ -54,28 +96,11 @@ fi
 [ -d "$HOME/Рабочий стол" ] && DESKTOP_PATH="$HOME/Рабочий стол" || DESKTOP_PATH="$HOME/Desktop"
 AUTOSTART_DIR="$HOME/.config/autostart"
 
-# Функция для проверки PortProton
-check_portproton() {
-    # Проверяем, установлен ли PortProton через flatpak (правильное имя приложения)
-    if flatpak list | grep -q ru.linux_gaming.PortProton; then
-        echo "flatpak run ru.linux_gaming.PortProton run '$TARGET_FILE'"
-        return 0
-    fi
-
-    # Проверяем, установлен ли PortProton через репозитории
-    if which portproton &>/dev/null; then
-        echo "portproton '$TARGET_FILE'"
-        return 0
-    fi
-
-    return 1
-}
-
 # Проверяем, является ли файл .exe и есть ли PortProton
 if [[ "$TARGET_FILE" == *.exe ]]; then
     PORT_PROTON_CMD=$(check_portproton)
     if [ $? -eq 0 ]; then
-        EXEC_COMMAND="$PORT_PROTON_CMD"
+        EXEC_COMMAND="$PORT_PROTON_CMD '$TARGET_FILE'"
     else
         yad --info --text="PortProton не найден в системе" --width=350
         EXEC_COMMAND="\"$TARGET_FILE\""
@@ -136,4 +161,4 @@ if [ "$AUTOSTART" = "TRUE" ]; then
     chmod +x "$AUTOSTART_DIR/$DESKTOP_FILENAME"
 fi
 
-[ "$MENU" = "TRUE" ] || [ "$AUTOSTART" = "TRUE" ] && kbuildsycoca6 --noincremental 2>/dev/null
+[ "$MENU" = "TRUE" ] || [ "$AUTOSTART" = "TRUE" ] && timeout 2 kbuildsycoca6 --noincremental 2>/dev/null
