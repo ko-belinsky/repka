@@ -49,6 +49,7 @@ check_portproton() {
 }
 
 TARGET_FILE="$(realpath "$1" 2>/dev/null || echo "$1")"  # Полный абсолютный путь к файлу
+WORKING_DIR="$(dirname "$TARGET_FILE")"  # Директория, содержащая файл
 DESKTOP_DIR="$HOME/.local/share/applications"
 TARGET_NAME=$(basename "$1")
 
@@ -141,6 +142,7 @@ Comment=$COMMENT
 Exec=$EXEC_COMMAND
 Icon=$ICON
 Terminal=false
+Path=$WORKING_DIR
 "
 
 chmod +x "$TARGET_FILE" 2>/dev/null
